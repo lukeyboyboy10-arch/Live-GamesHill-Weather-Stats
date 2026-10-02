@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #eaf4ff; margin: 0; padding: 20px; text-align: center; }
+        h1 { color: #1d3557; }
+        .system-status { display: block; background: #fff3cd; color: #856404; padding: 10px; margin: 15px auto; max-width: 600px; border-radius: 5px; border: 1px solid #ffeeba; font-weight: bold; }
+        .weather-grid { max-width: 900px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .weather-card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+        .value { font-size: 30px; font-weight: bold; color: #1d3557; }
+        .label { color: #666; margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+    <h1>My Weather Station</h1>
+    
+    <!-- Diagnostic Status Text Area -->
+    <div id="status-box" class="system-status">Initializing System...</div>
+
+    <div class="weather-grid">
+        <div class="weather-card"><div class="value" id="temperature">--°C</div><div class="label">Temperature</div></div>
+        <div class="weather-card"><div class="value" id="humidity">--%</div><div class="label">Humidity</div></div>
+        <div class="weather-card"><div class="value" id="wind">-- km/h</div><div class="label">Wind Speed</div></div>
+        <div class="weather-card"><div class="value" id="rain">-- mm</div><div class="label">Rain Today</div></div>
+        <div class="weather-card"><div class="value" id="direction">--</div><div class="label">Wind Direction</div></div>
+        <div class="weather-card"><div class="value" id="pressure">-- hPa</div><div class="label">Pressure</div></div>
+    </div>
+
+    <script>
+        // CONFIGURATION: Replace carefully inside the quotes
+        var MY_STATION = 'IKILMA132';
+        var MY_API_KEY = 'b65d463044b340a89d463044b380a821';
+
+        function loadWeather() {
+            var box = document.getElementById('status-box');
+            box.innerText = "Contacting Weather Underground...";
+
+            var queryUrl = "https://weather.com" + MY_STATION + "&format=json&units=m&apiKey=" + MY_API_KEY;
+
+            fetch(queryUrl)
+                .then(function(res) {
+                    if (!res.ok) {
+                        return res.text().then(function(errText) {
+                            throw new Error("Server rejected request: Status " + res.status + " -> " + errText);
+                        });
+                    }
+                    return res.json();
+                })
+                .then(function(jsonOut) {
+                    if (!jsonOut.observations || jsonOut.observations.length === 0) {
+                        box.innerText = "Error: Station ID found, but no live data packets are being received.";
+                        return;
+                    }
+
+                    var dataPacket = jsonOut.observations[0];
+                    var metrics = dataPacket.metric || {};
+
+                    box.innerText = "Data updated successfully at: " + (dataPacket.obsTimeLocal || "Live Now");
+                    box.style.background = "#d4edda";
+                    box.style.color = "#155724";
+                    box.style.borderColor = "#c3e6cb";
+
+                    document.getElementById('temperature').innerText = metrics.temp !== undefined ? metrics.temp + "°C" : "--°C";
+                    document.getElementById('humidity').innerText = dataPacket.humidity !== undefined ? dataPacket.humidity + "%" : "--%";
+                    document.getElementById('wind').innerText = metrics.windSpeed !== undefined ? metrics.windSpeed + " km/h" : "-- km/h";
+                    document.getElementById('rain').innerText = metrics.precipTotal !== undefined ? metrics.precipTotal + " mm" : "-- mm";
+                    document.getElementById('pressure').innerText = metrics.pressure !== undefined ? metrics.pressure + " hPa" : "-- hPa";
+
+                    if (dataPacket.winddir !== undefined) {
+                        var cardList = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+                        document.getElementById('direction').innerText = cardList[Math.round(dataPacket.winddir / 45) % 8];
+                    }
+                })
+                .catch(function(err) {
+                    box.innerText = err.message;
+                    box.style.background = "#f8d7da";
+                    box.style.color = "#721c24";
+                    box.style.borderColor = "#f5c6cb";
+                });
+        }
+
+        loadWeather();
+        setInterval(loadWeather, 120000);
+    </script>
+</body>
+</html>
