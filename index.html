@@ -3,45 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Live Weather Station</title>
+    <title>Live GamesHill Weather Station</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
-            background: #eaf4ff; 
+            background: #1a1a1a; 
+            color: #ffffff;
             margin: 0; 
             padding: 20px; 
             text-align: center; 
         }
-        h1 { color: #1d3557; margin-bottom: 5px; }
-        .subtitle { color: #555; margin-bottom: 30px; font-size: 16px; }
+        h1 { color: #ffffff; margin-bottom: 5px; }
+        .subtitle { color: #cccccc; margin-bottom: 30px; font-size: 16px; }
         
         .sticker-container {
             max-width: 900px;
             margin: auto;
-            background: white;
+            background: #2a2a2a;
             padding: 30px 15px;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
         }
 
-        /* Responsive iframe container */
         iframe {
             border: none;
             border-radius: 8px;
             width: 100%;
             max-width: 580px;
             height: 250px;
+            background: transparent;
         }
 
         .view-btn {
             display: inline-block;
             margin-top: 15px;
             padding: 12px 24px;
-            background-color: #1d3557;
+            background-color: #00a8ff;
             color: white;
             text-decoration: none;
             border-radius: 25px;
@@ -49,35 +50,32 @@
             transition: background 0.2s ease;
         }
         .view-btn:hover {
-            background-color: #457b9d;
+            background-color: #0084cc;
         }
     </style>
 </head>
 <body>
 
     <h1>🌦️ My Weather Station</h1>
-    <div class="subtitle">Live feeds broadcasting from my Raddy MN6 Console</div>
+    <div class="subtitle">Live feeds broadcasting from GamesHill Stewarton</div>
 
     <div class="sticker-container">
-        <!-- LIVE WEATHERCLOUD STICKER MOUNT -->
-        <!-- INSTRUCTIONS: Change the 10-digit number inside the URL below to your real Device Code -->
-        <iframe src="https://weathercloud.net"></iframe>
+        <!-- LIVE WEATHERCLOUD STICKER -->
+        <iframe id="weather-widget" src="" sandbox="allow-scripts allow-same-origin"></iframe>
 
-        <!-- Quick link to your full dashboard profile -->
-        <a href="https://weathercloud.net" id="full-profile-link" target="_blank" class="view-btn">
+        <a href="#" id="full-profile-link" target="_blank" class="view-btn">
             📊 View Full Charts & History
         </a>
     </div>
 
     <script>
-        // CONFIGURATION: Put your 10-digit Weathercloud device number here
-        // Example: '0123456789'
+        // CONFIGURATION: Put ONLY your numbers here (Example: '7541298532')
         var WEATHERCLOUD_DEVICE_CODE = '2266995417';
 
-        // Automatically configures the sticker graphics and buttons on page launch
-        if (WEATHERCLOUD_DEVICE_CODE !== 'YOUR_DEVICE_CODE_HERE') {
-            document.querySelector('iframe').src = "https://weathercloud.net" + WEATHERCLOUD_DEVICE_CODE + "/en/metric";
-            document.getElementById('full-profile-link').href = "https://app.weathercloud.net/d" + WEATHERCLOUD_DEVICE_CODE + "#current";
+        if (WEATHERCLOUD_DEVICE_CODE !== '2266995417') {
+            // Re-routing to use the direct open-embed URL structure
+            document.getElementById('weather-widget').src = "https://weathercloud.net" + WEATHERCLOUD_DEVICE_CODE + "/en/metric";
+            document.getElementById('full-profile-link').href = "https://weathercloud.net" + WEATHERCLOUD_DEVICE_CODE;
         }
     </script>
 </body>
