@@ -1,82 +1,278 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Live Weather Station</title>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #1a1a1a; 
-            color: #ffffff;
-            margin: 0; 
-            padding: 20px; 
-            text-align: center; 
-        }
-        h1 { color: #ffffff; margin-bottom: 5px; }
-        .subtitle { color: #cccccc; margin-bottom: 30px; font-size: 16px; }
-        
-        .sticker-container {
-            max-width: 900px;
-            margin: auto;
-            background: #2a2a2a;
-            padding: 30px 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Gameshill Weather Statistics</title>
+<style>
+:root {
+--bg-gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+--card-bg: rgba(255, 255, 255, 0.07);
+--card-border: rgba(255, 255, 255, 0.15);
+--text-main: #ffffff;
+--text-sub: #b0bec5;
+--accent-glow: #00e676;
+}
 
-        iframe {
-            border: none;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 580px;
-            height: 250px;
-            background: transparent;
-        }
+body {
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+background: var(--bg-gradient);
+background-attachment: fixed;
+color: var(--text-main);
+margin: 0;
+padding: 20px;
+display: flex;
+flex-direction: column;
+align-items: center;
+min-height: 100vh;
+}
 
-        .view-btn {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 12px 24px;
-            background-color: #00a8ff;
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: bold;
-            transition: background 0.2s ease;
-        }
-        .view-btn:hover {
-            background-color: #0084cc;
-        }
-    </style>
+.container {
+max-width: 900px;
+width: 100%;
+}
+
+header {
+text-align: center;
+margin-bottom: 30px;
+}
+
+h1 {
+font-size: 2.5rem;
+margin-bottom: 5px;
+letter-spacing: -0.5px;
+}
+
+.status-badge {
+display: inline-flex;
+align-items: center;
+background: rgba(0, 230, 118, 0.15);
+color: var(--accent-glow);
+padding: 6px 12px;
+border-radius: 20px;
+font-size: 0.85rem;
+font-weight: 600;
+border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.status-dot {
+width: 8px;
+height: 8px;
+background-color: var(--accent-glow);
+border-radius: 50%;
+margin-right: 8px;
+animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.7); }
+70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 230, 118, 0); }
+100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 230, 118, 0); }
+}
+
+/* Main Dashboard Grid */
+.weather-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: 20px;
+margin-bottom: 20px;
+}
+
+.card {
+background: var(--card-bg);
+border: 1px solid var(--card-border);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+border-radius: 16px;
+padding: 20px;
+text-align: center;
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+transform: translateY(-5px);
+box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+border-color: rgba(255, 255, 255, 0.25);
+}
+
+.card-large {
+grid-column: 1 / -1;
+display: flex;
+justify-content: space-around;
+align-items: center;
+flex-wrap: wrap;
+}
+
+.emoji {
+font-size: 2.5rem;
+margin-bottom: 10px;
+display: block;
+}
+
+.card-large .emoji {
+font-size: 4rem;
+margin-bottom: 0;
+}
+
+.value {
+font-size: 1.8rem;
+font-weight: 700;
+margin: 5px 0;
+}
+
+.card-large .value {
+font-size: 3.5rem;
+}
+
+.label {
+font-size: 0.9rem;
+color: var(--text-sub);
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.meta-footer {
+text-align: center;
+color: var(--text-sub);
+font-size: 0.85rem;
+margin-top: 30px;
+border-top: 1px solid var(--card-border);
+padding-top: 15px;
+}
+
+/* Loading & Error States */
+#loading {
+text-align: center;
+font-size: 1.2rem;
+padding: 40px;
+}
+
+#error-msg {
+background: rgba(255, 23, 68, 0.15);
+border: 1px solid #ff1744;
+color: #ff1744;
+padding: 15px;
+border-radius: 8px;
+text-align: center;
+display: none;
+margin-bottom: 20px;
+}
+</style>
 </head>
 <body>
 
-    <h1>🌦️ My Weather Station</h1>
-    <div class="subtitle">Live feeds broadcasting from my Raddy MN6 Console</div>
+<div class="container">
+<header>
+<h1>📡 Live Gameshill Weather Statistics</h1>
+<div class="status-badge">
+<div class="status-dot"></div> Live Station Feed
+</div>
+</header>
 
-    <div class="sticker-container">
-        <!-- LIVE WEATHERCLOUD STICKER -->
-        <iframe id="weather-widget" src="" sandbox="allow-scripts allow-same-origin"></iframe>
+<div id="error-msg">⚠️ Failed to connect to Weather Underground. Retrying shortly...</div>
+<div id="loading">🔮 Activating weather sensors...</div>
 
-        <a href="#" id="full-profile-link" target="_blank" class="view-btn">
-            📊 View Full Charts & History
-        </a>
-    </div>
+<!-- The dashboard items switch from invisible to visible once loaded -->
+<div id="dashboard" style="display: none;">
+<div class="weather-grid">
 
-    <script>
-        // CONFIGURATION: Put ONLY your numbers here (Example: '7541298532')
-        var WEATHERCLOUD_DEVICE_CODE = '2266995417';
+<!-- Main Temperature Display -->
+<div class="card card-large">
+<div>
+<span class="emoji">🌡️</span>
+<div class="label">Current Temperature</div>
+</div>
+<div class="value" id="temp">--°F</div>
+<div>
+<div class="label">Feels Like</div>
+<div id="feels-like" style="font-size: 1.2rem; font-weight: bold;">--°F</div>
+</div>
+</div>
 
-        if (WEATHERCLOUD_DEVICE_CODE !== '2266995417') {
-            // Re-routing to use the direct open-embed URL structure
-            document.getElementById('weather-widget').src = "https://weathercloud.net" + WEATHERCLOUD_DEVICE_CODE + "/en/metric";
-            document.getElementById('full-profile-link').href = "https://weathercloud.net" + WEATHERCLOUD_DEVICE_CODE;
-        }
-    </script>
-</body>
-</html>
+<!-- Wind Card -->
+<div class="card">
+<span class="emoji">💨</span>
+<div class="label">Wind Speed</div>
+<div class="value" id="wind-speed">-- mph</div>
+<div class="label" id="wind-dir" style="font-size:0.8rem; margin-top:5px;">Direction: --</div>
+</div>
+
+<!-- Humidity Card -->
+<div class="card">
+<span class="emoji">💧</span>
+<div class="label">Humidity</div>
+<div class="value" id="humidity">--%</div>
+</div>
+
+<!-- Rain Card -->
+<div class="card">
+<span class="emoji">🌧️</span>
+<div class="label">Precip Rate</div>
+<div class="value" id="precip-rate">-- in/hr</div>
+</div>
+
+<!-- Pressure Card -->
+<div class="card">
+<span class="emoji">🎈</span>
+<div class="label">Barometric</div>
+<div class="value" id="pressure">-- inHg</div>
+</div>
+
+<!-- Solar Radiation Card -->
+<div class="card">
+<span class="emoji">☀️</span>
+<div class="label">Solar Rad</div>
+<div class="value" id="solar-rad">-- w/m²</div>
+</div>
+
+<!-- UV Index Card -->
+<div class="card">
+<span class="emoji">🕶️</span>
+<div class="label">UV Index</div>
+<div class="value" id="uv-index">--</div>
+</div>
+
+</div>
+</div>
+
+<footer class="meta-footer">
+Station ID: <strong id="display-station-id">--</strong> | Last Updated: <span id="update-time">--</span>
+</footer>
+</div>
+
+<script>
+// ==========================================
+// CONFIGURATION: Replace placeholders below
+// ==========================================
+const STATION_ID = 'IKILMA132';
+const API_KEY = 'b65d463044b340a89d463044b380a821';
+
+// Weather Underground API endpoint for Personal Weather Stations (PWS)
+const URL = `https://weather.com{STATION_ID}&format=json&units=e&apiKey=${API_KEY}`;
+
+async function fetchWeather() {
+try {
+const response = await fetch(URL);
+if (!response.ok) throw new Error('API update failed');
+
+const data = await response.json();
+const obs = data.observations[0];
+
+// Hide loading layer, ensure error is hidden, show data dashboard
+document.getElementById('loading').style.display = 'none';
+document.getElementById('error-msg').style.display = 'none';
+document.getElementById('dashboard').style.display = 'block';
+
+// Populate fields with live telemetry metrics
+document.getElementById('temp').textContent = `${Math.round(obs.imperial.temp)}°F`;
+document.getElementById('feels-like').textContent = `${Math.round(obs.imperial.windChill || obs.imperial.temp)}°F`;
+document.getElementById('wind-speed').textContent = `${Math.round(obs.imperial.windSpeed)} mph`;
+document.getElementById('wind-dir').textContent = `Direction: ${obs.winddir}°`;
+document.getElementById('humidity').textContent = `${obs.humidity}%`;
+document.getElementById('precip-rate').textContent = `${obs.imperial.precipRate} in/hr`;
+document.getElementById('pressure').textContent = `${obs.imperial.pressure} inHg`;
+document.getElementById('solar-rad').textContent = obs.solarRadiation !== null ? `${obs.solarRadiation} w/m²` : 'N/A';
+document.getElementById('uv-index').textContent = obs.uv !== null ? obs.uv : 'N/A';
+
+document.getElementById('display-station-id').textContent = STATION_ID;
+
